@@ -9,7 +9,7 @@ for line in train_text:
     # приведем все символы к lowercase
     line = line.lower()
     # оставим только алфавитные символы
-    line = re.sub('[^a-zа-я ]', '', line)
+    line = re.sub('[^a-zа-я ']', '', line)
     # разделение строки по словам
     line_list = line.split()
     #зафиксируем последнее слово строчки
