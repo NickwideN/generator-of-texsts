@@ -1,40 +1,30 @@
-def OnlyAlpha(s):
-    Symbols_not_removed = " '"
-    i = 0
-    while i < len(s):
-        if not(s[i].isalpha() or s[i] in Symbols_not_removed):
-            if i == len(s):
-                s = s[:i]
-                i -= 1
-            else:
-                s = s[:i] + s[i + 1:]
-                i -= 1
-        i += 1
-    return s
-    
-def OnlyLowercase(s):
-    s = ' ' + s
-    for i in range(len(s)):
-        if s[i].isupper():
-            if ((s[i] == 'I') and (s[i - 1] == ' ' and s[i + 1] == ' ')):
-                continue
-            s = s[:i] + s[i].lower() + s[i + 1:]
-    return s
+import re
+
 #очистим файл model.txt
 model = open('model.txt', 'w')  
 model.close()
 
 #ну, приступим
-train_text = open('test.txt', 'r')
+train_text = open('text.txt', 'r', encoding="utf-8")
+#объявление переменной, содержащая последнее слово предыдущей строчки
 last_word = ''
 for line in train_text:
-    line = last_word + ' ' + line
-    line = OnlyAlpha(line)
-    line = OnlyLowercase(line)
+    # вставим в начало строчки последнее слово предыдущей
+    # строчки
+    line = last_word + ' ' + line 
+    # приведем все символы к lowercase
+    line = line.lower()
+    # оставим только алфавитные символы
+    line = re.sub('[^a-zа-я ']', '', line)
+    #line = OnlyAlpha(line)
+   
+    # разделение строки по словам
     line_list = line.split()
-    last_word = line_list[-1]
+    if line_list:
+        last_word = line_list[-1]
     
     
+    #работа с парами слов
     for i in range(len(line_list) - 1):
         new_pair = line_list[i] + '\t' +  line_list[i + 1]
         #print('\n\nnext pair: ', new_pair)
@@ -63,28 +53,6 @@ for line in train_text:
     
 print('ok')
 train_text.close()
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
