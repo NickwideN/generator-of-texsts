@@ -1,13 +1,24 @@
 import re
-if __name__ == '__main__':
-    train_text = open('text.txt', 'r', encoding="utf-8")
+import argparse
+import sys
+import os
+import ast
+parser = argparse.ArgumentParser()
+parser.add_argument('--input-dir', default=None, dest='input_dir', help='Way to collection of train_files, only .txt files exept model')
+
+parser.add_argument('--model', type=argparse.FileType('w'), default=open('model.txt', 'w'), help='Way to file for saving model')
+
+parser.add_argument('--lc', action='store_true', help='To produce lowacase train files')
+args = parser.parse_args()
+
+def get_Lib(train_text, Lib):
     last_word = ''  #содержит последнее слово предыдущей строчки
-    Lib = {}        #библиотека пар слов
     for line in train_text:
         # вставим в начало строчки последнее слово предыдущей строчки
         line = last_word + ' ' + line 
         # приведем все символы к lowercase
-        line = line.lower()
+        if (args.lc):
+            line = line.lower()
         # оставим только алфавитные символы
         line = re.sub("[^a-zа-я' ]", '', line)
         # разделение строки по словам
@@ -24,11 +35,22 @@ if __name__ == '__main__':
                     Lib[line_list[i]][line_list[i + 1]] = 1
             else:
                 Lib[line_list[i]] = {line_list[i + 1]: 1}
+    return Lib
     
-    #вывод быблиотеки в файл model.txt
-    model = open('model.txt', 'w')
-    model.write(str(Lib))
-    model.close()
-     
-    train_text.close()
-    print('ok')
+def main():
+    if args.input_dir:
+        Lib = {}       #библиотека пар слов
+        pattern = re.compile(r'.*\.txt')
+        exept_pattern = re.compile(args.model.name)
+        train_list = [_file for _file in os.listdir(args.input_dir) if pattern.match(_file) and not(exept_pattern.match(_file))]
+        print(train_list)
+        for _file in train_list:
+            train_text = open(args.input_dir + _file, 'r', encoding="utf-8")
+            Lib = get_Lib(train_text, Lib)
+            train_text.close()
+        args.model.write(str(Lib))
+        print('ok')
+    
+    
+if __name__ == '__main__':
+    main()
