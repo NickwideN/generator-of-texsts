@@ -1,19 +1,20 @@
 import re
 import argparse
+import pickle
 
 import os
 import ast
 from collections import defaultdict
 
 parser = argparse.ArgumentParser( formatter_class=argparse.ArgumentDefaultsHelpFormatter, description='Creat a library for generate of sequence of words. After train.py use generate.py')
-parser.add_argument('--input-dir', '-i', default='stdin', dest='input_dir', help='Way to collection of train_files, only .txt files exept model.txt')
+parser.add_argument('--input-dir', '-i', default='stdin', dest='input_dir', help='Way to collection of train_files, it will take only .txt files')
 
-parser.add_argument('--model', '-m', type=argparse.FileType('w'), default=open('model.txt', 'w'), help='Way to file for saving model')
+parser.add_argument('--model', '-m', type=argparse.FileType('wb'), default=open('model.pickle', 'wb'), help='Way to file for saving model. File extension is "*.pickle"')
 
 parser.add_argument('--lc', action='store_true', help='To produce lowacase train files')
 args = parser.parse_args()
     
-def add_file_in_Lib(train_text, Lib):
+def add_text_in_Lib(train_text, Lib):
     last_word = ''  #содержит последнее слово предыдущей строчки
     for line in train_text:
         Lib, last_word = add_line_in_Lib(line, Lib, last_word)
@@ -44,11 +45,10 @@ def main():
     Lib = defaultdict(dict)       #библиотека пар слов
     if args.input_dir != 'stdin':
         pattern = re.compile(r'.*\.txt')
-        exept_pattern = re.compile(args.model.name)
-        train_list = [_file for _file in os.listdir(args.input_dir) if pattern.match(_file) and not(exept_pattern.match(_file))]
+        train_list = [_file for _file in os.listdir(args.input_dir) if pattern.match(_file)]
         for _file in train_list:
             train_text = open(args.input_dir + _file, 'r', encoding="utf-8")
-            Lib = add_file_in_Lib(train_text, Lib)
+            Lib = add_text_in_Lib(train_text, Lib)
             train_text.close()
     else:
         train_text = ''
@@ -57,9 +57,9 @@ def main():
             if not(line):
                 break
             train_text += ' ' + line
-        print("train_text:  ", train_text)
         Lib = add_line_in_Lib(train_text, Lib)[0]
-    args.model.write(str(dict(Lib)))
+    #print('Lib: ', Lib, '\n')
+    pickle.dump(Lib, args.model)
     print('ok')
 
 
