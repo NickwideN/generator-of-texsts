@@ -3,9 +3,10 @@ import ast
 import argparse
 import sys
 import random
+import pickle
 parser = argparse.ArgumentParser(description='Ganerate sequence of words, based on model, which created by train.txt')
 
-parser.add_argument('--model','-m', type=argparse.FileType('r'), default=open('model.txt', 'r'), help='Way to file for reading model')
+parser.add_argument('--model','-m', type=argparse.FileType('rb'), default=open('model.pickle', 'rb'), help='Way to file for reading model')
 
 parser.add_argument('--seed', '-s', default=None, help='The first word of the sequence. (default: random word')
 
@@ -32,8 +33,7 @@ def next_word(word_1, Lib):
 
 def main():
     #импорт библиотеки
-	model = args.model
-	Lib = ast.literal_eval(model.read())
+	Lib = pickle.load(args.model)
 	#ввод первого слова
 	word = args.seed
 	if not(word): word = random.choice(list(Lib.keys()))
